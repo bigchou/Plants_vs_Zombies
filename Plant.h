@@ -2,15 +2,16 @@
 #define Plant_HHH
 #include <string>
 #include <iostream>
+#include <fstream>
 
-static constexpr int num_of_plants = 4;
+
 static const std::string filename("plants.txt");
 
 class Plant{
 public:
     Plant(int id = '\0',std::string name = "unnamed", int cost = 0, int hp = 0, int max_hp = 0):id_(id),name_(name),cost_(cost),hp_(hp),max_hp_(max_hp){}
     virtual ~Plant(){}
-    virtual bool ReadFile(const std::string &filename) = 0;
+    //void Read(std::ifstream& ifile, Plant* &plants);
     virtual void Display()const{
         std::cout << name_ << " $" << cost_ << " HP: " << hp_ <<" - gives ";
     }
@@ -30,6 +31,7 @@ public:
     int Cost()const{return cost_;}
     int Hp()const{return hp_;}
     int Max_Hp()const{return max_hp_;}
+    //void Set_Id(char id){id_ = id;}
 protected:
     char id_ = '\0';
     std::string name_ = "unnamed";
@@ -53,7 +55,8 @@ inline std::ostream& operator << (std::ostream& os, const Plant* plant){//by poi
 class BombPlant : public Plant{
 public:
     BombPlant():Plant(){}
-    virtual bool ReadFile(const std::string &filename) override;
+    BombPlant(std::ifstream& ifile, Plant plant):Plant(plant.Id(),plant.Name(),plant.Cost(),plant.Hp(),plant.Hp()){}
+    //virtual bool ReadFile(const std::string &filename) override;
     virtual void Display()const override{
         Plant::Display();
         std::cout << hp_ << " damage points";
@@ -67,7 +70,10 @@ private:
 class HealPlant : public Plant{
 public:
     HealPlant(int heal_point = 0):Plant(),heal_point_(heal_point){}
-    virtual bool ReadFile(const std::string &filename)override;
+    HealPlant(std::ifstream& ifile, Plant plant):Plant(plant.Id(),plant.Name(),plant.Cost(),plant.Hp(),plant.Hp()){
+        ifile >>  heal_point_;
+    }
+    //virtual bool ReadFile(const std::string &filename)override;
     virtual void Display()const override{
         Plant::Display();
         std::cout << "gives all your plants " << heal_point_ << " HP back.";
@@ -82,7 +88,11 @@ private:
 class CoinPlant : public Plant{
 public:
     CoinPlant(int round = 0,int earn = 0):Plant(),round_(round),earn_(earn){}
-    virtual bool ReadFile (const std::string &filename)override;
+    CoinPlant(std::ifstream& ifile, Plant plant):Plant(plant.Id(),plant.Name(),plant.Cost(),plant.Hp(),plant.Hp()){
+        ifile >> round_ >> earn_;
+        Set_MaxVisits(round_);
+    }
+    //virtual bool ReadFile (const std::string &filename)override;
     virtual void Display()const override{
         Plant::Display();
         std::cout << "gives $" << earn_ << " every " << round_ << " rounds";
@@ -107,7 +117,10 @@ private:
 class ShootPlant : public Plant{
 public:
     ShootPlant(int damage = 0):Plant(),damage_(damage){}
-    virtual bool ReadFile(const std::string &filename) override;
+    ShootPlant(std::ifstream& ifile, Plant plant):Plant(plant.Id(),plant.Name(),plant.Cost(),plant.Hp(),plant.Hp()){
+        ifile >> damage_;
+    }
+    //virtual bool ReadFile(const std::string &filename) override;
     virtual void Display()const override{
         Plant::Display();
         std::cout << "gives " << damage_ << " damage points";
@@ -116,5 +129,6 @@ public:
 private:
     int damage_ = 0;
 };
-
+int Read(std::ifstream& ifile, Plant* plants[]);
+int ReadFile(const std::string &filename, Plant* plants[]);
 #endif // Plant_HHH

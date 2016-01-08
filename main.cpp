@@ -1,15 +1,24 @@
 #include <iostream>
 #include "Plant.h"
 using namespace std;
-
+static constexpr int max_num = 4;
 int main(){
     // Initialize
     cout << "=== Initialize ===" << endl << endl;
-    Plant *plants[num_of_plants] = {new BombPlant, new HealPlant, new CoinPlant, new ShootPlant};
+    Plant *plants[max_num] = {0};
+    //Plant *plants[num_of_plants] = {new BombPlant, new HealPlant, new CoinPlant, new ShootPlant};
+
     // Read_File
     cout << "=== Read ===" << endl << endl;
-    for(int i=0;i<num_of_plants;++i){
+    int num_of_plants = ReadFile(filename,plants);
+    /*for(int i=0;i<num_of_plants;++i){
         plants[i]->ReadFile(filename);
+    }*/
+
+    // DisplayAll
+    cout << "=== DisplayAll ===" << endl;
+    for(int i=0;i<num_of_plants;++i){
+        cout << "[" << i << "]" << plants[i] << endl;//optional: plants[i]->Display();
     }
     // Print_BombPlant
     cout << "=== Print_BombPlant ===" << endl ;
@@ -36,17 +45,19 @@ int main(){
     ShootPlant* shootplant = dynamic_cast<ShootPlant*>(plants[3]);
     if(coinplant)
         cout << "damage: " << shootplant->Damage() << endl << endl;
-    // Print
-    cout << "=== DisplayAll ===" << endl;
-    for(int i=0;i<num_of_plants;++i){
-        cout << "[" << i << "]" << plants[i] << endl;//optional: plants[i]->Display();
-    }
+
     // Show Status
     cout << "=== Show_Status ===" << endl;
     for(int i=0;i<num_of_plants;++i){
         plants[i]->ShowStatus();
         cout << endl;
     }
+
+
+
+
+
+
     // Being attacked
     cout << "=== After being attacked by enemy (Suppose enemy's damage point is 15 ===" << endl;
     int damage_point = 15;
