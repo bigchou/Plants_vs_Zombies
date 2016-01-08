@@ -1,96 +1,159 @@
 #include <iostream>
+#include <cstdlib>
 #include "Plant.h"
+#include "player.h"
+#include "zombie.h"
 using namespace std;
-static constexpr int max_num = 4;
+
 int main(){
     // Initialize
-    cout << "=== Initialize ===" << endl << endl;
-    Plant *plants[max_num] = {0};
-    //Plant *plants[num_of_plants] = {new BombPlant, new HealPlant, new CoinPlant, new ShootPlant};
-
-    // Read_File
-    cout << "=== Read ===" << endl << endl;
-    int num_of_plants = ReadFile(filename,plants);
-    /*for(int i=0;i<num_of_plants;++i){
-        plants[i]->ReadFile(filename);
-    }*/
-
-    // DisplayAll
-    cout << "=== DisplayAll ===" << endl;
-    for(int i=0;i<num_of_plants;++i){
-        cout << "[" << i << "]" << plants[i] << endl;//optional: plants[i]->Display();
-    }
-    // Print_BombPlant
-    cout << "=== Print_BombPlant ===" << endl ;
-    cout << plants[0]->Id() << ' ' << plants[0]->Name() << " $" << plants[0]->Cost() << ' ' << plants[0]->Hp() << " Max_hp: " << plants[0]->Max_Hp() << endl << endl;
-    BombPlant* bombplant = dynamic_cast<BombPlant*>(plants[0]);
-    // Print_HealPlant
-    cout << "=== Print_HealPlant ===" << endl ;
-    cout << plants[1]->Id() << ' ' << plants[1]->Name() << " $" << plants[1]->Cost() << ' ' << plants[1]->Hp() << ' ' << " Max_hp: " << plants[1]->Max_Hp() << ' ';
-    HealPlant* healplant = dynamic_cast<HealPlant*>(plants[1]);
-    if(healplant)
-        cout << "recover " << healplant->Heal_Point() << " hp per visit!" << endl << endl;
-    // Print_CoinPlant
-    cout << "=== Print_CoinPlant ===" << endl ;
-    cout << plants[2]->Id() << ' ' << plants[2]->Name() << " $" << plants[2]->Cost() << ' ' << plants[2]->Hp() << " Max_hp: " << plants[2]->Max_Hp() << ' ';
-    CoinPlant* coinplant = dynamic_cast<CoinPlant*>(plants[2]);
-    if(coinplant){
-        cout << "earn " << coinplant->Earn() << " every " << coinplant->Round() << " round(s)!" << endl;
-        cout << "max_visits = " << coinplant->Max_Visits() << endl << endl;
-    }
-
-    // Print_ShootPlant
-    cout << "=== Print_ShootPlant ===" << endl;
-    cout << plants[3]->Id() << ' ' << plants[3]->Name() << " $" << plants[3]->Cost() << ' ' << plants[3]->Hp() << ' ' << " Max_hp: " << plants[3]->Max_Hp() << ' ';
-    ShootPlant* shootplant = dynamic_cast<ShootPlant*>(plants[3]);
-    if(coinplant)
-        cout << "damage: " << shootplant->Damage() << endl << endl;
-
-    // Show Status
-    cout << "=== Show_Status ===" << endl;
-    for(int i=0;i<num_of_plants;++i){
+    vector<Plant*> plants;
+    // ReadFile
+    int num = Read(filename,plants);//the subroutine will return the number of plants.
+    if(!num) return 0;//if number of plants is 0, the program should exit!
+    // Display
+    cout << "DisplayAll" << endl;
+    for(int i=0;i<num;++i)
+        cout << "[" << i << "]" << plants[i] <<endl;//optional: plants[i]->Display();
+    cout << "Show_Status" << endl;
+    for(int i=0;i<num;++i){
         plants[i]->ShowStatus();
         cout << endl;
     }
+    cout << endl;
 
 
 
 
 
 
+
+
+
+
+    Zombie zombie;
+    Player player;
     // Being attacked
-    cout << "=== After being attacked by enemy (Suppose enemy's damage point is 15 ===" << endl;
-    int damage_point = 15;
-    for(int i=0;i<num_of_plants;++i){
-        plants[i]->Suffer(damage_point);
+    cout << "After being attacked by enemy and the attack of enemy is " << zombie.Damage() << endl;
+    for(int i=0;i<num;++i){
+        plants[i]->Suffer(zombie.Damage());
         cout << "[" << i << "]" << plants[i] << endl;//optional: plants[i]->Display();
     }
-    // being healed
-    cout << "=== After being healed (notice that HP cannot be greater than MAX_HP) ===" << endl;
-    for(int i=0;i<num_of_plants;++i){
-        plants[i]->Healed(healplant->Heal_Point());
-        cout << "[" << i << "]" << plants[i] << endl;//optional: plants[i]->Display();
+    // Being healed
+    cout << "After being healed (notice that HP cannot be greater than MAX_HP)" << endl;
+    for(int i=0;i<num;++i){
+        if(plants[i]->Id() == 'H'){
+            int recover = plants[i]->GetHealPt();
+            for(int j=0;j<num;++j){
+                plants[j]->Healed(recover);
+            }
+            break;
+        }
     }
+    for(int i=0;i<num;++i)
+        cout << "[" << i << "]" << plants[i] << endl;//optional: plants[i]->Display();
+    cout << endl;
+
+
+
+
+
+
+
+
+
+
     // Visit the land with CoinPlant
-    cout << "=== Visit the land with CoinPlant ===" << endl;
-    cout << "Before: ";
-    coinplant->ShowStatus();
-    cout << endl << "*** Visit the land! ***" << endl;
-    coinplant->Decre_Round();
-    cout << "After: ";
-    coinplant->ShowStatus();
-    cout << endl << "*** Visit the land again! ***" << endl;
-    cout << "Yeah! I get " << coinplant->Earn() << endl;
-    // HornPlant attacks enemy
-    cout << "=== HornPlant attacks enemy ===" << endl;
-    cout << "the zombie suffers " << shootplant->Damage() << "-point damage" << endl;
-    // BombPlant attacks enemy
-    cout << "=== BombPlant attacks enemy ===" << endl;
-    cout << "the zombie suffers " << bombplant->Hp() << "-point damage" << endl;
-    // Remember to deallocate memory
-    cout << "=== Deallocate_Memory ===" << endl << endl;
-    for(int i=0;i<num_of_plants;++i){
-        delete plants[i];
+    cout << "Visit the land with CoinPlant" << endl;
+    cout << "I have " << player.Dollar() << " now" << endl;
+    cout << "Before: " << endl;
+    for(int i=0;i<num;++i){
+        if(plants[i]->Id() == 'C'){
+            plants[i]->ShowStatus();
+            cout << endl;
+        }
     }
+    cout << "Visit the land!" << endl;
+    cout << "After: " << endl;
+    for(int i=0;i<num;++i){
+        if(plants[i]->Id() == 'C'){
+            plants[i]->Interact(player);
+            plants[i]->ShowStatus();
+            cout << endl;
+        }
+    }
+    cout << "Visit the land again!" << endl;
+    for(int i=0;i<num;++i){
+        if(plants[i]->Id() == 'C'){
+            plants[i]->Interact(player);
+            plants[i]->ShowStatus();
+            cout << endl;
+        }
+    }
+    cout << "Yeah! I get " << player.Dollar() << endl;
+    cout << endl;
+
+
+
+
+
+
+
+
+
+
+
+
+
+    // HornPlant attacks enemy
+    cout << "HornPlant attacks enemy" << endl;
+    cout << "Before: zombie_hp : " << zombie.HP() << endl;
+    for(int i=0;i<num;++i){
+        if(plants[i]->Id() == 'S')plants[i]->Interact(zombie);
+    }
+    cout << "After: zombie_hp : " << zombie.HP() << endl;
+    cout << endl;
+
+
+
+
+
+
+
+
+
+
+
+
+    // BombPlant attacks enemy
+    cout << "BombPlant attacks enemy" << endl;
+    cout << "Before: zombie_hp : " << zombie.HP() << endl;
+    for(int i=0;i<num;++i){
+        if(plants[i]->Id() == 'B')plants[i]->Interact(zombie);
+    }
+    cout << "After: zombie_hp : " << zombie.HP() << endl;
+    cout << endl;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    // Deallocating Memory is highly necessary!
+    cout << "Remember to deallocate memory" << endl << endl;
+    for (std::vector<Plant*>::iterator it = plants.begin() ; it != plants.end(); ++it){
+        delete (*it);
+    }
+    plants.clear();
+    system("pause");
     return 0;
 }
